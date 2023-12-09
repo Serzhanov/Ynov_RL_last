@@ -36,6 +36,6 @@ def ppo_policy_testing(model, env):
         done = terminated or truncated
         i += 1
         progress_bar.progress(i)
-    # progress_bar.progress(i)
+
     st.success('Test Complete')
     return info

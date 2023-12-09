@@ -3,12 +3,16 @@ import matplotlib.pyplot as plt
 from IPython import display
 import streamlit as st
 from env import CustomEnv
+from algorithm_application import generate_actions, generate_rewards
 # importing mobile_env automatically registers the predefined scenarios in Gym
 import mobile_env
 from policy_ppo import ppo_policy_training, ppo_policy_testing
 from ANN_data_gen import generate_data
 from ANN import init_ANN
 import numpy as np
+from algorithm_application import experiment
+from display import multi_plot_data
+
 ENV = None
 
 
@@ -66,7 +70,7 @@ def main():
 
     st.title('Policy')
     box_option = st.selectbox("Select an option:", [
-        'None', 'ANN', 'Thompson', 'PPO', 'EXP3', 'UCB', 'DGPB'])
+        'None', 'ANN', 'Thompson/UCB/EpsilonGreedy', 'PPO', 'EXP3', 'DGPB'])
 
     if box_option == 'PPO':
         model = ppo_policy_training(ENV)
@@ -98,10 +102,23 @@ def main():
                       size=size, hidden_layers_size=hidden_layers_size, learning_rate=learning_rate)
         dummy_action = ENV.action_space.sample()
         nn_action = nn.forward(dummy_action)  # might return float
+        st.write('Testing')
         nn_action = [int(x) for x in nn_action[0]]
         obs, reward, terminated, truncated, info = ENV.step(nn_action)
         display_info(info)
         plot_env(ENV)
+
+    if box_option == 'Thompson/UCB/EpsilonGreedy':
+        actions = generate_actions(ENV)
+        reward_table = generate_rewards(ENV, actions)
+        timesteps = st.number_input(
+            "Timesteps :", value=5, max_value=100, min_value=5)
+        simulations = st.number_input(
+            'Simulations "', value=5, max_value=100, min_value=5)
+        regrets, names, best_actions_by_algo = experiment(actions=actions, rewards=reward_table, arm_count=len(actions),
+                                                          simulations=simulations, timesteps=timesteps)
+        multi_plot_data(regrets, names=names)
+        display_info(best_actions_by_algo)
 
 
 if __name__ == '__main__':
