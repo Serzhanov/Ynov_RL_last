@@ -1,14 +1,12 @@
 import gymnasium
-import matplotlib.pyplot as plt
-from IPython import display
 import streamlit as st
 from env import CustomEnv
 from algorithm_application import generate_actions, generate_rewards
 # importing mobile_env automatically registers the predefined scenarios in Gym
 import mobile_env
-from policy_ppo import ppo_policy_training, ppo_policy_testing
-from ANN_data_gen import generate_data
-from ANN import init_ANN
+from PPO.ppo_policy import ppo_policy_training, ppo_policy_testing
+from ANN.ann import generate_data
+from ANN.nn_data_gen import init_ANN
 import numpy as np
 from algorithm_application import experiment
 from display import multi_plot_data, plot_data
@@ -17,7 +15,13 @@ from RL_classes.EXP3 import EXP3
 ENV = None
 
 
+def display_and_plot(env, info):
+    display_info(info)
+    plot_env(env)
+
+
 def init_env(ENV):
+    '''Initiate enviroment'''
     ENV.reset()
     dummy_action = ENV.action_space.sample()
     obs, reward, terminated, truncated, info = ENV.step(dummy_action)
@@ -25,11 +29,13 @@ def init_env(ENV):
 
 
 def display_info(info):
+    '''Display info of actions'''
     table_data = [(key, value) for key, value in info.items()]
     st.table(table_data)
 
 
 def plot_env(ENV):
+    '''Plot current enviroment state'''
     st.image(ENV.render())
 
 
@@ -76,8 +82,7 @@ def main():
     if box_option == 'PPO':
         model = ppo_policy_training(ENV)
         info = ppo_policy_testing(model, ENV)
-        display_info(info)
-        plot_env(ENV)
+        display_and_plot(ENV)
 
     if box_option == 'ANN':
 
@@ -106,8 +111,7 @@ def main():
         st.write('Testing')
         nn_action = [int(x) for x in nn_action[0]]
         obs, reward, terminated, truncated, info = ENV.step(nn_action)
-        display_info(info)
-        plot_env(ENV)
+        display_and_plot(ENV, info)
 
     if box_option == 'Thompson/UCB/EpsilonGreedy':
         actions = generate_actions(ENV)
@@ -122,7 +126,6 @@ def main():
         st.write('Best action performance')
         algo_choice = st.selectbox("Select best algo for action:", [
             'Thompson', 'UCB', 'Epsilon Greedy'])
-        action_chosen = [0, 0, 0]
         if algo_choice == 'Thompson':
             action = best_actions_by_algo['thompson']
         if algo_choice == 'UCB':
@@ -131,15 +134,13 @@ def main():
             action = best_actions_by_algo['epsilon-greedy']
         action = [int(x) for x in action]
         obs, reward, terminated, truncated, info = ENV.step(action)
-        display_info(info)
-        plot_env(ENV)
+        display_and_plot(ENV, info)
 
     if box_option == 'EXP3':
         actions = generate_actions(ENV)
         reward_table = generate_rewards(ENV, actions)
         simulations = st.number_input(
             "Simulations :", value=5, max_value=1000, min_value=5)
-        # st.number_input(label=“systolic blood pressure”,step=1.,format="%.2f")
         gamma = st.number_input(
             "Gamma :", value=0.1, max_value=1.0, min_value=0.1, format="%.2f", step=1.)
         eta = st.number_input(
@@ -152,8 +153,7 @@ def main():
         action = exp3_algo.get_best_action()
         action = [int(x) for x in action]
         obs, reward, terminated, truncated, info = ENV.step(action)
-        display_info(info)
-        plot_env(ENV)
+        display_and_plot(ENV, info)
 
 
 if __name__ == '__main__':

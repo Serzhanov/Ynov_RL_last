@@ -8,12 +8,14 @@ from RL_classes.Ucb import UCB
 
 
 def get_utility(env, line):
+    '''Get utility rate of Network enviroment'''
     env.reset()
     obs, reward, terminated, truncated, info = env.step(line)
     return info['mean utility']
 
 
 def generate_actions(env):
+    '''Generate random actions'''
     action = env.action_space.sample()
     shape = (action.shape[0], 100)
     val_range = (0, np.max(action[0]))
@@ -23,6 +25,7 @@ def generate_actions(env):
 
 
 def generate_rewards(env, actions):
+    '''Generate rewards by taken actions'''
     reward_table = []
     for i in range(len(actions)):
         reward_table.append(get_utility(env, actions[i]))
