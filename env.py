@@ -45,38 +45,3 @@ class CustomEnv(MComCore):
             user = UserEquipment(ue_id=i, **env_config['ue'])
             users.append(user)
         super().__init__(stations, users, config, render_mode)
-
-
-class CustomHandler(MComCentralHandler):
-    # let's call the new observation "any_connection"
-    features = MComCentralHandler.features + ["any_connection"]
-
-    # overwrite the observation size per user
-    @classmethod
-    def ue_obs_size(cls, env) -> int:
-        """Increase observations by 1 for each user for the new obs"""
-        # previously: connections for all cells, SNR for all cells, utility
-        prev_size = env.NUM_STATIONS + env.NUM_STATIONS + 1
-        return prev_size + 1
-
-    # add the new observation
-    @classmethod
-    def observation(cls, env) -> np.ndarray:
-        """Concatenated observations for all users"""
-        # get all available obs from the env
-        obs_dict = env.features()
-
-        # add the new observation for each user (ue)
-        for ue_id in obs_dict.keys():
-            any_connection = np.any(obs_dict[ue_id]["connections"])
-            obs_dict[ue_id]["any_connection"] = int(any_connection)
-
-        # select the relevant obs and flatten into single vector
-        flattened_obs = []
-        for ue_id, ue_obs in obs_dict.items():
-            flattened_obs.extend(ue_obs["connections"])
-            flattened_obs.append(ue_obs["any_connection"])
-            flattened_obs.extend(ue_obs["snrs"])
-            flattened_obs.extend(ue_obs["utility"])
-
-        return flattened_obs

@@ -77,7 +77,7 @@ def main():
 
     st.title('Policy')
     box_option = st.selectbox("Select an option:", [
-        'None', 'ANN', 'Thompson/UCB/EpsilonGreedy', 'PPO', 'EXP3', 'DGPB'])
+        'None', 'ANN', 'Thompson/UCB/EpsilonGreedy', 'PPO', 'EXP3'])
 
     if box_option == 'PPO':
         model = ppo_policy_training(ENV)
