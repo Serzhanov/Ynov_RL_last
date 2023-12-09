@@ -11,7 +11,8 @@ from ANN_data_gen import generate_data
 from ANN import init_ANN
 import numpy as np
 from algorithm_application import experiment
-from display import multi_plot_data
+from display import multi_plot_data, plot_data
+from RL_classes.EXP3 import EXP3
 
 ENV = None
 
@@ -23,9 +24,8 @@ def init_env(ENV):
     return display_info(info)
 
 
-def display_info(info, column_names=['NAME', 'VALUE']):
+def display_info(info):
     table_data = [(key, value) for key, value in info.items()]
-    table_data.insert(0, tuple(column_names))
     st.table(table_data)
 
 
@@ -36,7 +36,7 @@ def plot_env(ENV):
 def main():
     global ENV
     # Streamlit app header
-    st.sidebar.title("Streamlit App with Options")
+    st.sidebar.title("Create or Choose your enviroment")
 
     # Add options using radio buttons
     option = st.sidebar.radio("Choose a enviroment size:", [
@@ -119,6 +119,7 @@ def main():
         regrets, names, best_actions_by_algo = experiment(actions=actions, rewards=reward_table, arm_count=len(actions),
                                                           simulations=simulations, timesteps=timesteps)
         multi_plot_data(regrets, names=names)
+        st.write('Best action performance')
         algo_choice = st.selectbox("Select best algo for action:", [
             'Thompson', 'UCB', 'Epsilon Greedy'])
         action_chosen = [0, 0, 0]
@@ -128,6 +129,27 @@ def main():
             action = best_actions_by_algo['ucb']
         if algo_choice == 'Epsilon Greedy':
             action = best_actions_by_algo['epsilon-greedy']
+        action = [int(x) for x in action]
+        obs, reward, terminated, truncated, info = ENV.step(action)
+        display_info(info)
+        plot_env(ENV)
+
+    if box_option == 'EXP3':
+        actions = generate_actions(ENV)
+        reward_table = generate_rewards(ENV, actions)
+        simulations = st.number_input(
+            "Simulations :", value=5, max_value=1000, min_value=5)
+        # st.number_input(label=“systolic blood pressure”,step=1.,format="%.2f")
+        gamma = st.number_input(
+            "Gamma :", value=0.1, max_value=1.0, min_value=0.1, format="%.2f", step=1.)
+        eta = st.number_input(
+            "Eta :", value=0.1, max_value=1.0, min_value=0.1, format="%.2f", step=1.)
+        exp3_algo = EXP3(num_arms=len(actions), simulations_num=simulations,
+                         rewards=reward_table, actions=actions, gamma=gamma, eta=eta)
+        simulations, rewards = exp3_algo.simulate()
+        plot_data(simulations, rewards, xlabel='simulations', ylabel='rewards')
+        st.write('Best action performance')
+        action = exp3_algo.get_best_action()
         action = [int(x) for x in action]
         obs, reward, terminated, truncated, info = ENV.step(action)
         display_info(info)

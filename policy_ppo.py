@@ -18,7 +18,6 @@ def ppo_policy_training(env, total_timesteps=10):
         t += 1
 
     # Remove the progress bar when training is complete
-    # progress_bar.empty()
     st.success('Training Complete')
     return model
 

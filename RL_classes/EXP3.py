@@ -1,57 +1,42 @@
-import math
-import pandas as pd
 import numpy as np
-from numpy.random import choice
 
 
-def distr(weights, gamma=0.0):
-    weight_sum = float(sum(weights))
-    return tuple((1.0 - gamma) * (w / weight_sum) + (gamma / len(weights)) for w in weights)
+class EXP3:
+    def __init__(self, num_arms, simulations_num, rewards, actions, gamma=0.1, eta=0.1):
+        self.num_arms = num_arms
+        self.gamma = gamma
+        self.eta = eta
+        self.weights = np.ones(num_arms)
+        self.simulations_num = simulations_num
+        self.reward_table = rewards
+        self.actions = actions
+        self.probabilities = np.ones(num_arms) / num_arms
+        self.best_action = None
+        self.current_reward = float('-inf')
 
+    def choose_arm(self):
+        return np.random.choice(self.num_arms, p=self.probabilities)
 
-def draw(probability_distribution, n_recs=1):
-    arm = choice(df.movieId.unique(), size=n_recs,
-                 p=probability_distribution, replace=False)
-    return arm
+    def update(self, chosen_arm, reward):
+        estimated_reward = reward / self.probabilities[chosen_arm]
+        self.weights[chosen_arm] *= np.exp(self.eta * estimated_reward)
+        normalization_factor = np.sum(self.weights)
+        self.probabilities = (1 - self.gamma) * (self.weights /
+                                                 normalization_factor) + (self.gamma / self.num_arms)
 
+    def simulate(self):
+        time_steps = [i for i in range(self.simulations_num)]
+        rewards = []
+        for _ in range(self.simulations_num):
+            chosen_arm = self.choose_arm()
+            action = self.actions[chosen_arm]
+            reward = self.reward_table[chosen_arm]
+            if self.current_reward < reward:
+                self.current_reward = reward
+                self.best_action = action
+            rewards.append(reward)
+            self.update(chosen_arm=chosen_arm, reward=reward)
+        return time_steps, rewards
 
-def update_weights(weights, gamma, movieId_weight_mapping, probability_distribution, actions):
-    # iter through actions. up to n updates / rec
-    if actions.shape[0] == 0:
-        return weights
-    for a in range(actions.shape[0]):
-        action = actions[a:a+1]
-        weight_idx = movieId_weight_mapping[action.movieId.values[0]]
-        estimated_reward = 1.0 * \
-            action.liked.values[0] / probability_distribution[weight_idx]
-        weights[weight_idx] *= math.exp(estimated_reward * gamma / num_arms)
-    return weights
-
-
-def exp3_policy(df, history, t, weights, movieId_weight_mapping, gamma, n_recs, batch_size):
-    '''
-    Applies EXP3 policy to generate movie recommendations
-    Args:
-        df: dataframe. Dataset to apply EXP3 policy to
-        history: dataframe. events that the offline bandit has access to (not discarded by replay evaluation method)
-        t: int. represents the current time step.
-        weights: array or list. Weights used by EXP3 algorithm.
-        movieId_weight_mapping: dict. Maping between movie IDs and their index in the array of EXP3 weights.
-        gamma: float. hyperparameter for algorithm tuning.
-        n_recs: int. Number of recommendations to generate in each iteration. 
-        batch_size: int. Number of observations to show recommendations to in each iteration.
-    '''
-    probability_distribution = distr(weights, gamma)
-    recs = draw(probability_distribution, n_recs=n_recs)
-    history, action_score = score(history, df, t, batch_size, recs)
-    weights = update_weights(
-        weights, gamma, movieId_weight_mapping, probability_distribution, action_score)
-    action_score = action_score.liked.tolist()
-    return history, action_score, weights
-
-
-movieId_weight_mapping = dict(
-    map(lambda t: (t[1], t[0]), enumerate(df.movieId.unique())))
-history, action_score, weights = exp3_policy(
-    df, history, t, weights, movieId_weight_mapping, args.gamma, args.n, args.batch_size)
-rewards.extend(action_score)
+    def get_best_action(self):
+        return self.best_action
