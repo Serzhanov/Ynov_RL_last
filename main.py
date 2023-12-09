@@ -23,8 +23,9 @@ def init_env(ENV):
     return display_info(info)
 
 
-def display_info(info):
+def display_info(info, column_names=['NAME', 'VALUE']):
     table_data = [(key, value) for key, value in info.items()]
+    table_data.insert(0, tuple(column_names))
     st.table(table_data)
 
 
@@ -112,13 +113,25 @@ def main():
         actions = generate_actions(ENV)
         reward_table = generate_rewards(ENV, actions)
         timesteps = st.number_input(
-            "Timesteps :", value=5, max_value=100, min_value=5)
+            "Timesteps :", value=5, max_value=1000, min_value=5)
         simulations = st.number_input(
-            'Simulations "', value=5, max_value=100, min_value=5)
+            'Simulations "', value=5, max_value=1000, min_value=5)
         regrets, names, best_actions_by_algo = experiment(actions=actions, rewards=reward_table, arm_count=len(actions),
                                                           simulations=simulations, timesteps=timesteps)
         multi_plot_data(regrets, names=names)
-        display_info(best_actions_by_algo)
+        algo_choice = st.selectbox("Select best algo for action:", [
+            'Thompson', 'UCB', 'Epsilon Greedy'])
+        action_chosen = [0, 0, 0]
+        if algo_choice == 'Thompson':
+            action = best_actions_by_algo['thompson']
+        if algo_choice == 'UCB':
+            action = best_actions_by_algo['ucb']
+        if algo_choice == 'Epsilon Greedy':
+            action = best_actions_by_algo['epsilon-greedy']
+        action = [int(x) for x in action]
+        obs, reward, terminated, truncated, info = ENV.step(action)
+        display_info(info)
+        plot_env(ENV)
 
 
 if __name__ == '__main__':

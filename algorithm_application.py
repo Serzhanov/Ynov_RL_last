@@ -32,6 +32,7 @@ def generate_rewards(env, actions):
 def simulate(simulations, timesteps, arm_count, Algorithm, actions, rewards):
     """ Simulates the algorithm over 'simulations' epochs """
     sum_regrets = np.zeros(timesteps)
+    best_actions = {}
     for e in range(simulations):
         bandit = Bandit(arm_count, actions, rewards=rewards)
         algo = Algorithm(bandit)
@@ -41,9 +42,9 @@ def simulate(simulations, timesteps, arm_count, Algorithm, actions, rewards):
             reward, regret = algo.get_reward_regret(action)
             regrets[i] = regret
         sum_regrets += regrets
+        best_actions[algo.name()] = algo.get_best_action()
     mean_regrets = sum_regrets / simulations
-
-    return mean_regrets, algo.get_best_action()
+    return mean_regrets, best_actions
 
 
 def experiment(arm_count, actions, rewards, timesteps=100, simulations=100):
@@ -54,14 +55,17 @@ def experiment(arm_count, actions, rewards, timesteps=100, simulations=100):
       simulations: (int) number of epochs
     """
     algos = [EpsilonGreedy, UCB, BernThompson]
-    best_action_by_algo = {}
     regrets = []
     names = []
+    best_actions_by_algo = {}
     for algo in algos:
-        mean_regrets, best_action = simulate(simulations, timesteps,
-                                             arm_count, algo, actions, rewards)
+        mean_regrets, best_actions = simulate(simulations, timesteps,
+                                              arm_count, algo, actions, rewards)
         regrets.append(mean_regrets)
         names.append(algo.name())
-        best_action_by_algo[algo.name()] = best_action
+        if algo.name() not in best_actions_by_algo.keys():
+            best_actions_by_algo[algo.name()] = best_actions[algo.name()]
+        elif best_actions[algo.name()] > best_actions_by_algo[algo.name()]:
+            best_actions_by_algo[algo.name()] = best_actions[algo.name()]
 
-    return regrets, names, best_action_by_algo
+    return regrets, names, best_actions_by_algo

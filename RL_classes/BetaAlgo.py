@@ -32,6 +32,9 @@ class BetaAlgo():
     def _update_params(self, arm, reward):
         self.alpha[arm] += reward
         self.beta[arm] += 1 - reward
+        if (self.alpha <= 0).any() or (self.beta <= 0).any():
+            self.alpha = np.where(self.alpha <= 0, 0.0001, self.alpha)
+            self.beta = np.where(self.beta <= 0, 0.0001, self.beta)
 
 
 class BernGreedy(BetaAlgo):
@@ -59,10 +62,8 @@ class BernThompson(BetaAlgo):
 
     def get_action(self):
         """ Bernouilli parameters are sampled from the beta"""
-        if (self.alpha < 0).any() or (self.beta < 0).any():
-            return 0
         theta = np.random.beta(self.alpha, self.beta)
         return theta.argmax()
 
     def get_best_action(self):
-        return self.bandit.reward_table[self.best_arm]
+        return self.bandit.actions[self.best_arm]

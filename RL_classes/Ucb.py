@@ -45,4 +45,4 @@ class UCB():
             (reward - self.Q[arm])  # inc. update rule
 
     def get_best_action(self):
-        return self.bandit.reward_table[self.best_arm]
+        return self.bandit.actions[self.best_arm]
