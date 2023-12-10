@@ -9,6 +9,9 @@ The project utilizes the `mobile-env` environment, which supports multi-agent an
 - Different Reinforcement algorithms to apply on the environment with a user-friendly web interface.
 - Algorithms generate the best possible action on the environment to get the best utility according to them.
 
+## Reward and Action Configuration
+- Actions are generated uniformly at random using the bounds of the environment.
+- Rewards are determined based on the mean utility of the corresponding actions.
 
 ## Requirements
 - Python 3.x

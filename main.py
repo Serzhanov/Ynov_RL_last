@@ -40,6 +40,7 @@ def plot_env(ENV):
 
 
 def main():
+    st.title('Initate Enviroment')
     global ENV
     # Streamlit app header
     st.sidebar.title("Create or Choose your enviroment")
@@ -119,7 +120,7 @@ def main():
         timesteps = st.number_input(
             "Timesteps :", value=5, max_value=1000, min_value=5)
         simulations = st.number_input(
-            'Simulations "', value=5, max_value=1000, min_value=5)
+            'Simulations: ', value=5, max_value=1000, min_value=5)
         regrets, names, best_actions_by_algo = experiment(actions=actions, rewards=reward_table, arm_count=len(actions),
                                                           simulations=simulations, timesteps=timesteps)
         multi_plot_data(regrets, names=names)
