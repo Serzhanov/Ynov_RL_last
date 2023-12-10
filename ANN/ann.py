@@ -82,7 +82,29 @@ class SigmoidActivation:
         """
         return np.array(x) * np.array((1 - x))
 
-# (Similar comments for ReLUActivation and TanhActivation classes)
+
+class SigmoidActivation:
+    def __call__(self, x):
+        return 1 / (1 + np.exp(-x))
+
+    def derivative(self, x):
+        return np.array(x) * np.array((1 - x))
+
+
+class ReLUActivation:
+    def __call__(self, x):
+        return np.maximum(x, 0)
+
+    def derivative(self, x):
+        return np.where(x > 0, 1, 0)
+
+
+class TanhActivation:
+    def __call__(self, x):
+        return 2 / (1 + np.exp(-2*x)) - 1
+
+    def derivative(self, x):
+        return 1 - np.power(self(x), 2)
 
 
 class NeuralNetwork:

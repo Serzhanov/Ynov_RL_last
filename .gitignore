@@ -1,2 +1,6 @@
 venv
 results_sb
+_pycache_
+PPO/_pycache_
+ANN/_pycache_
+RL_classes/_pycache_

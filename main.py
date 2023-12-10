@@ -5,8 +5,8 @@ from algorithm_application import generate_actions, generate_rewards
 # importing mobile_env automatically registers the predefined scenarios in Gym
 import mobile_env
 from PPO.ppo_policy import ppo_policy_training, ppo_policy_testing
-from ANN.ann import generate_data
-from ANN.nn_data_gen import init_ANN
+from ANN.nn_data_gen import generate_data
+from ANN.ann import init_ANN
 import numpy as np
 from algorithm_application import experiment
 from display import multi_plot_data, plot_data
@@ -82,7 +82,7 @@ def main():
     if box_option == 'PPO':
         model = ppo_policy_training(ENV)
         info = ppo_policy_testing(model, ENV)
-        display_and_plot(ENV)
+        display_and_plot(ENV, info)
 
     if box_option == 'ANN':
 
