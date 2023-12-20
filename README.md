@@ -17,12 +17,22 @@ The project utilizes the `mobile-env` environment, which supports multi-agent an
 - Python 3.x
 - Dependencies listed in `requirements.txt`
 
-### Dependencies
-Before making changes, ensure that you have the necessary dependencies installed, including Streamlit, Plotly Express, Pandas, and Folium. You can install them using `pip`:
+## Installation
 
-```bash
-python -m pip install -r requirements.txt
-```
+1. Clone the repository to your local machine:
+
+   ```bash
+   git clone https://github.com/Serzhanov/Ynov_RL_last.git
+   cd Ynov_RL_last
+
+2. Install all requirements & fetch data:
+   pip install -r requirements.txt
+   
+## Usage:
+    #get back to main repository cd ..
+
+    streamlit run main.py
+
 
 ## User Guide
 
