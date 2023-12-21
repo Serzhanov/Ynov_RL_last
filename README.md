@@ -26,7 +26,7 @@ The project utilizes the `mobile-env` environment, which supports multi-agent an
    cd Ynov_RL_last
 
 2. Install all requirements & fetch data:
-   pip install -r requirements.txt
+   ```pip install -r requirements.txt```
    
 ## Usage:
     #get back to main repository cd ..
