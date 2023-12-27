@@ -50,8 +50,8 @@ class Layer:
         bias_gradient = np.sum(linear_grad, axis=0, keepdims=True)
 
         # Update the weights and bias using gradient descent
-        self.weights += learning_rate * weight_grad
-        self.bias += learning_rate * bias_gradient
+        self.weights -= learning_rate * weight_grad
+        self.bias -= learning_rate * bias_gradient
         # Compute the gradient of the loss with respect to the inputs
         inputs_gradient = np.dot(linear_grad, self.weights.T)
         return inputs_gradient
